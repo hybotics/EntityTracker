@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 	Program:		SetServos.py
@@ -17,6 +17,10 @@
 	Set Pan/Tilt servo limits
 '''
 panLeftFull = 500
-panRightFull = 2400
-tiltUpFull = 2000
-tiltDownFull = 500
+panRightFull = 2500
+
+shoulderUpFull = 2500
+shoulderDownFull = 500
+
+elbowUpFull = 2500
+elbowDownFull = 500
