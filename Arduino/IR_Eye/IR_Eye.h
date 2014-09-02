@@ -41,10 +41,8 @@
 #define	BUILD_DATE 						"01-Sep-2014"
 #define	BUILD_BOARD						"Bluno"
 
-#define	COLOR_SENSOR_LED				12
-
-#define	SPEAKER_OUT						5
-#define	HEARTBEAT_LED					13
+#define	SPEAKER_OUT						5			//	Digital 5
+#define	HEARTBEAT_LED					13			//	Digital 13
 
 //	Display constants
 #define	MAX_NUMBER_7SEG_DISPLAYS		0
@@ -65,102 +63,64 @@
 #define	DISPLAY_TIME_FREQ_MIN			15
 #define	DISPLAY_TEMPERATURE_FREQ_MIN	15
 
-/*
-	Sensor settings
-*/
-
-#define	MAX_NUMBER_AREA_READINGS		36
-
-#define	IR_PIN_BASE						0			//	Analog 0
-#define	PING_PIN_BASE					6			//	Digital 6
-
-#define	MAX_NUMBER_PING					0
-
-#define	PING_FRONT_CENTER				0
-#define	PING_FRONT_LEFT					1
-#define	PING_FRONT_RIGHT				2
-
-#define	MAX_NUMBER_IR					0
-
-#define	IR_FRONT_CENTER					0
-#define	IR_BACK_CENTER					1
-#define	IR_BACK_LEFT					2
-#define	IR_BACK_RIGHT					3
-
-#define	MAX_NUMBER_IR					0
+//  For SoftI2CMaster
+#define	SOFT_I2C_SDA_PIN				2			//	Digital 2
+#define	SOFT_I2C_SCL_PIN				3			//	Digital 3
 
 /*
 	Dagu Compound IR Sensor Settings
 */
 
-#define	IR_EYE_ANALOG_UP				0			//	Analog 0
-#define	IR_EYE_ANALOG_DOWN				1			//	Analog 1
-#define	IR_EYE_ANALOG_LEFT				2			//	Analog 2
+#define	IR_EYE_ANALOG_TOP				0			//	Analog 0
+#define	IR_EYE_ANALOG_LEFT				1			//	Analog 1
+#define	IR_EYE_ANALOG_BOTTOM			2			//	Analog 2
 #define	IR_EYE_ANALOG_RIGHT				3			//	Analog 3
 
 #define IR_EYE_DIGITAL					4			//	Digital 4
 
-//  For SoftI2CMaster
-#define	SOFT_I2C_SDA_PIN				2
-#define	SOFT_I2C_SCL_PIN				3
-
 /*
 	Hardware Serial ports
 */
+
 //	Serial:	Console and Debug port
 #define	SERIAL_CONSOLE_RX_PIN			0
 #define	SERIAL_CONSOLE_TX_PIN			1
 
-/*
-	The following settings apply to the SSC-32 servo controller
-*/
-#define SCAN_SENSOR_DELAY				350
 
-#define	SERVO_MOTOR_LEFT_PIN			4
-#define	SERVO_MOTOR_LEFT_ADJUST	        0
-#define	SERVO_MOTOR_LEFT_MIN			1000
-#define	SERVO_MOTOR_LEFT_MAX			2000
-
-#define	SERVO_MOTOR_RIGHT_PIN	        5
-#define	SERVO_MOTOR_RIGHT_ADJUST        0
-#define	SERVO_MOTOR_RIGHT_MIN			1000
-#define	SERVO_MOTOR_RIGHT_MAX			2000
-
-#define	SERVO_MOTOR_NEUTRAL				1500
-
+//	Servos:	Pins and Settings
 #define	SERVO_MAX_DEGREES				90
 #define SERVO_INVALID_DEGREES			9999
 #define	SERVO_CENTER_MS					1500
 
-#define	SERVO_ARM_PAN_PIN				6
+#define	SERVO_ARM_PAN_PIN				6			//	Digital 6
 #define SERVO_ARM_PAN_NAME				"ArmPan"
 #define	SERVO_ARM_PAN_HOME				650
 #define	SERVO_ARM_PAN_OFFSET			-90
 #define	SERVO_ARM_PAN_MIN				500
 #define	SERVO_ARM_PAN_MAX				2500
 
-#define	SERVO_ARM_SHOULDER_PIN			7
+#define	SERVO_ARM_SHOULDER_PIN			7			//	Digital 7
 #define SERVO_ARM_SHOULDER_NAME			"ArmShoulder"
 #define	SERVO_ARM_SHOULDER_HOME			600
-#define	SERVO_ARM_SHOULDER_OFFSET			0
+#define	SERVO_ARM_SHOULDER_OFFSET		0
 #define	SERVO_ARM_SHOULDER_MIN			500
 #define	SERVO_ARM_SHOULDER_MAX			2500
 
-#define	SERVO_ARM_ELBOW_PIN				8
+#define	SERVO_ARM_ELBOW_PIN				8			//	Digital 8
 #define SERVO_ARM_ELBOW_NAME			"ArmElbow"
 #define	SERVO_ARM_ELBOW_HOME			2500
 #define	SERVO_ARM_ELBOW_OFFSET			0
 #define	SERVO_ARM_ELBOW_MIN				500
 #define	SERVO_ARM_ELBOW_MAX				2500
 
-#define	SERVO_GRIP_WRIST_PIN			9
+#define	SERVO_GRIP_WRIST_PIN			9			//	Digital 9
 #define SERVO_GRIP_WRIST_NAME			"GripWrist"
 #define SERVO_GRIP_WRIST_HOME			SERVO_CENTER_MS
 #define	SERVO_GRIP_WRIST_OFFSET			0
 #define	SERVO_GRIP_WRIST_LEFT_MIN		500
 #define	SERVO_GRIP_WRIST_RIGHT_MAX		2400
 
-#define	SERVO_GRIP_GRAB_PIN				10
+#define	SERVO_GRIP_GRAB_PIN				10			//	Digital 10
 #define SERVO_GRIP_GRAB_NAME			"GripGrab"
 #define SERVO_GRIP_GRAB_HOME			SERVO_CENTER_MS
 #define	SERVO_GRIP_GRAB_OFFSET			-135
