@@ -110,14 +110,7 @@ RTC_DS1307 clock;
 //	Total number of area readings taken, or -1 if data is not valid
 int nrAreaScanReadings;
 
-//  These are where the range sensor readings are stored.
-int ping[MAX_NUMBER_PING];
-float ir[MAX_NUMBER_IR];
-
 bool areaScanValid = false, hasMoved = false;
-
-//	Readings for full area scans
-AreaScanReading areaScan[MAX_NUMBER_AREA_READINGS];
 
 //	Readings from the TCS34725 RGB Color Sensor
 ColorSensor colorData = {
@@ -172,33 +165,6 @@ Adafruit_8x8matrix matrix8x8 = Adafruit_8x8matrix();
 
 //	Hardware Serial: Console and debug (replaces Serial.* routines)
 BMSerial console(SERIAL_CONSOLE_RX_PIN, SERIAL_CONSOLE_TX_PIN);
-
-//	Hardware Serial1: RoboClaw 3x5 Motor Controller
-RoboClaw roboClaw(SERIAL_ROBOCLAW_RX_PIN, SERIAL_ROBOCLAW_TX_PIN, 10000, false);
-
-//	Hardware Serial2: SSC-32 Servo Controller
-BMSerial ssc32(SERIAL_SSC32_RX_PIN, SERIAL_SSC32_TX_PIN);
-
-//	Hardware Serial3: XBee Mesh Wireless
-BMSerial xbee(SERIAL_XBEE_RX_PIN, SERIAL_XBEE_TX_PIN);
-
-//	We only have one RoboClaw 2x5 right now
-uint8_t roboClawControllers = ROBOCLAW_CONTROLLERS - 1;
-uint8_t	roboClawBaseAddress = ROBOCLAW_SERIAL_BASE_ADDR;
-uint8_t roboClawAddress1 = ROBOCLAW_SERIAL_BASE_ADDR;
-uint8_t roboClawAddress2 = ROBOCLAW_SERIAL_BASE_ADDR + 1;
-
-//	Left side motor (M1) - RoboClaw 2x5 Controller #1 (0x80)
-Motor leftMotorM1;
-
-//	Right side motor (M2) - RoboClaw 2x5 Controller #1 (0x80)
-Motor rightMotorM2;
-
-//	Front motor (M1) - RoboClaw 2x5 Controller #2 (0x81)
-Motor frontMotorM1;
-
-//	Back motor (M2) - RoboClaw 2x5 Controller #2 (0x81)
-Motor backMotorM2;
 
 /********************************************************************/
 /*	Initialize servos 												*/
@@ -519,49 +485,6 @@ void displayHeatSensorReadings (HeatSensor *heatData) {
 }
 
 /*
-    Display the GP2Y0A21YK0F IR sensor readings (cm)
-*/
-void displayIR (void) {
-	int sensorNr = 0;
-  
-	console.println(F("IR Sensor readings:"));
-
-	while (sensorNr < MAX_NUMBER_IR) {
-		console.print(F("IR #"));
-		console.print(sensorNr + 1);
-		console.print(F(" range = "));
-		console.print(ir[sensorNr]);
-		console.println(F(" cm"));
-
-		sensorNr += 1;
-	}
-
-	console.println();
-}
-
-/*
-	Display the readings from the PING Ultrasonic sensors
-*/
-void displayPING (void) {
-	int sensorNr = 0;
-  
-	console.println(F("PING Ultrasonic Sensor readings:"));
-  
-	//	Display PING sensor readings (cm)
-	while (sensorNr < MAX_NUMBER_PING) {
-		console.print(F("Ping #"));
-		console.print(sensorNr + 1);
-		console.print(F(" range = "));
-		console.print(ping[sensorNr]);
-		console.println(F(" cm"));
-
-		sensorNr += 1;
-	}
- 
-	console.println();
-}
-
-/*
 	Display the readings from the IMU (Accelerometer, Magnetometer [Compass], Gyroscope,
 		and Orientation (if valid)
 */
@@ -628,97 +551,6 @@ void displayIMUReadings (sensors_event_t *accelEvent, sensors_event_t *compassEv
 	console.println();
 }
 
-/*
-	Display the data for a given motor
-*/
-void displayMotor (Motor *motor, String name) {
-	console.print(motor->name);
-	console.println(F(" Motor:"));
-
-	//	Using Packet Serial
-	console.print(F("Encoder is valid: "));
-
-	if (motor->encoderValid) {
-		console.print(F("Yes, Status: "));
-		console.print(motor->encoderStatus);
-		console.print(F(", Value: "));
-		console.println(motor->encoder);
-	} else {
-		console.println(F("No"));
-	}
-
-	console.print(F("Speed is valid: "));
-
-	if (motor->speedValid) {
-		console.print(F("Yes, Status: "));
-		console.print(motor->speedStatus);
-		console.print(F(", Speed: "));
-		console.println(motor->speed);
-	} else {
-		console.println(F("No"));
-	}
-
-	console.print(F("Moving "));
-
-	if (motor->forward) {
-		console.print(F("Forward"));
-	} else {
-		console.print(F("Reverse"));
-	}
-
-	console.print(F("Distance is valid: "));
-
-	if (motor->distanceValid) {
-		console.print(F("Yes, Distance: "));
-		console.println(motor->distance);
-	} else {
-		console.println(F("No"));
-	}
-}
-
-/*
-	Display data from the RoboClaw 2x5 motor controller
-*/
-void displayRoboClawData (uint8_t address, Motor *leftMotorM1, Motor *rightMotorM2) {
-	char version[32];
-
-	roboClaw.ReadVersion(address, version);
-
-	console.print(F("RoboClaw 2x5 status (version "));
-	console.print(version);
-	console.print(F("): "));
-	console.println();
-
-    if (leftMotorM1->encoderValid) {
-		console.print(F("Left Motor Encoder = "));
-		console.print(leftMotorM1->encoder, DEC);
-		console.print(F(", Status =  "));
-		console.print(leftMotorM1->encoderStatus, HEX);
-		console.println();
-	}
-
-	if (leftMotorM1->speedValid) {
-		console.print(F("Left Motor Speed = "));
-		console.print(leftMotorM1->speed, DEC);
-		console.println();
-	}
-
-	if (rightMotorM2->encoderValid) {
-		console.print(F("Right Motor Encoder = "));
-		console.print(rightMotorM2->encoder, DEC);
-		console.print(F(", Status = "));
-		console.print(rightMotorM2->encoderStatus, HEX);
-		console.println();
-	}
-
-	if (rightMotorM2->speedValid) {
-		console.print(F("Right Motor Speed = "));
-		console.print(rightMotorM2->speed, DEC);
-		console.println();
-	}
-	
-	console.println();
-}
 
 /*
 	Display the data in a Servo struct
@@ -750,142 +582,6 @@ void displayServo (Servo *servo, String servoName) {
 	console.print(F(", Error = "));
 	console.println(servo->error);
 	console.println();
-}
-
-/* 
-	Function to read a value from a GP2Y0A21YK0F infrared distance sensor and return a
-		distance value in centimeters.
-
-	This sensor should be used with a refresh rate of 36ms or greater.
-
-	Javier Valencia 2008
-
-	float readIR(byte pin)
-
-	It can return -1 if something has gone wrong.
-
-	TODO: Make several readings over a time period, and average them
-		for the final reading.
-
-	NOTE: This code is for the older Sharp GP2D12 IR sensor, and will no
-		doubt have to be adjusted to work correctly with the newer sensor.
-*/
-float readIR (byte sensorNr) {
-	byte pin = sensorNr + IR_PIN_BASE;
-	int tmp;
-
-	tmp = analogRead(pin);
-
-	if (tmp < 3) {
-		return -1;                                  // Invalid value
-	} else {
-		return (6787.0 /((float)tmp - 3.0)) - 4.0;  // Distance in cm
-	}
-}
-
-/*
-	Ping))) Sensor 
-
-	This routine reads a PING))) ultrasonic rangefinder and returns the
-		distance to the closest object in range. To do this, it sends a pulse
-		to the sensor to initiate a reading, then listens for a pulse
-		to return.  The length of the returning pulse is proportional to
-		the distance of the object from the sensor.
-
-	The circuit:
-		* +V connection of the PING))) attached to +5V
-		* GND connection of the PING))) attached to ground
-		* SIG connection of the PING))) attached to digital pin 7
-
-	http://www.arduino.cc/en/Tutorial/Ping
-
-	Created 3 Nov 2008
-		by David A. Mellis
-
-	Modified 30-Aug-2011
-		by Tom Igoe
-
-	Modified 09-Aug-2013
-		by Dale Weber
-
-		Set units = true for cm, and false for inches
-*/
-int readPING (byte sensorNr, bool units=true) {
-	byte pin = sensorNr + PING_PIN_BASE;
-	long duration;
-	int result;
-
-	/*
-		The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-		Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-	*/
-	pinMode(pin, OUTPUT);
-	digitalWrite(pin, LOW);
-	delayMicroseconds(2);
-	digitalWrite(pin, HIGH);
-	delayMicroseconds(5);
-	digitalWrite(pin, LOW);
-
-	/*
-		The same pin is used to read the signal from the PING))): a HIGH
-		pulse whose duration is the time (in microseconds) from the sending
-		of the ping to the reception of its echo off of an object.
-	*/
-	pinMode(pin, INPUT);
-	duration = pulseIn(pin, HIGH);
-
-	//  Convert the duration into a distance
-	if (units) {
-		//	Return result in cm
-		result = microsecondsToCentimeters(duration);
-	} else {
-		//  Return result in inches.
-		result = microsecondsToInches(duration);
-	}
- 
-	delay(100);
-  
-	return result;
-}
-
-/*
-	Read current data from the RoboClaw 2x5 Motor Controller
-*/
-uint16_t readRoboClawData (uint8_t address, Motor *leftM1, Motor *rightM2) {
-	bool valid;
-	uint8_t status;
-
-	//	Error control
-	uint16_t errorStatus;
-	String errorMsg;
-
-	errorStatus = 0;
-
-	console.println(F("Reading Left Motor Encoder.."));
-
-	leftM1->encoder = roboClaw.ReadEncM1(address, &status, &valid);
-	leftM1->encoderStatus = status;
-	leftM1->encoderValid = valid;
-
-	console.println(F("Reading Left Motor Speed.."));
-
-	leftM1->speed = roboClaw.ReadSpeedM1(address, &status, &valid);
-	leftM1->speedStatus = status;
-	leftM1->speedValid = valid;
-
-	console.println(F("Reading Right Motor Encoder.."));
-
-	rightM2->encoder = roboClaw.ReadEncM2(address, &status, &valid);
-	rightM2->encoderStatus = status;
-	rightM2->encoderValid = valid;
-
-	console.println(F("Reading Right Motor Speed.."));
-
-	rightM2->speed = roboClaw.ReadSpeedM2(address, &status, &valid);
-	rightM2->speedStatus = status;
-	rightM2->speedValid = valid;
-
-	return errorStatus;
 }
 
 /********************************************************************/
@@ -1007,102 +703,6 @@ void displayDistanceReading (DistanceReading *reading) {
 	console.println(F(" degrees"));
 
 	console.println();
-}
-
-DistanceReading getClosestObject () {
-	uint8_t irNr = 0, pingNr = 0, readingNr;
-
-	DistanceReading distReading;
-
-	console.println(F("Finding the closest object.."));
-
-	//	Find the closest object
-	for (readingNr = 0; readingNr < nrAreaScanReadings; readingNr++) {
-		//	Check for the closest object
-		if (areaScan[readingNr].ping < areaScan[pingNr].ping) {
-			pingNr = readingNr;
-		}
-
-		if (areaScan[readingNr].ir <  areaScan[irNr].ir) {
-			irNr = readingNr;
-		}
-	}
-
-	distReading.dist = Closest;
-
-	distReading.irNr = irNr;
-	distReading.irDistance = areaScan[irNr].ir;
-	distReading.irPositionDeg = areaScan[irNr].positionDeg;
-
-	distReading.pingNr = pingNr;
-	distReading.pingDistance = areaScan[pingNr].ping;
-	distReading.pingPositionDeg = areaScan[pingNr].positionDeg;
-
-	return distReading;
-}
-
-DistanceReading getFarthestObject () {
-	uint8_t irNr = 0, pingNr = 0, readingNr;
-
-	DistanceReading distReading;
-
-	console.println(F("Finding the farthest object.."));
-
-	//	Find the farthest object
-	for (readingNr = 0; readingNr < nrAreaScanReadings; readingNr++) {
-		//	Check for the farthest object
-		if (areaScan[readingNr].ping > areaScan[pingNr].ping) {
-			pingNr = readingNr;
-		}
-
-		if (areaScan[readingNr].ir > areaScan[irNr].ir) {
-			irNr = readingNr;
-		}
-	}
-
-	distReading.dist = Farthest;
-
-	distReading.irNr = irNr;
-	distReading.irDistance = areaScan[irNr].ir;
-	distReading.irPositionDeg = areaScan[irNr].positionDeg;
-
-	distReading.pingNr = pingNr;
-	distReading.pingDistance = areaScan[pingNr].ping;
-	distReading.pingPositionDeg = areaScan[pingNr].positionDeg;
-
-	return distReading;
-}
-
-/*
-	Convert a servo pulse width in ms to an angle in degrees (0 to 180)
-*/
-uint16_t pulseToDegrees (Servo *servo, uint16_t pulseWidthUS) {
-	uint16_t degrees = (pulseWidthUS - SERVO_CENTER_MS) / 11;
-	uint16_t result;
-
-	//	Error control
-	uint16_t errorStatus = 0;
-	String errorMsg;
-
-/*
-	console.print(F("(pulseToDegrees) degrees = "));
-	console.print(degrees);
-	console.print(F(", pulseWidthUS = "));
-	console.println(pulseWidthUS);
-*/
-	if ((pulseWidthUS < servo->minPulse) || (pulseWidthUS > servo->maxPulse)) {
-		errorStatus = 3001;
-		errorMsg = String(F("Servo pulse is out of range"));
-	}
-
-	if (errorStatus != 0) {
-		result = 999;
-		processError(errorStatus, "pulseToDegrees", errorMsg);
-	} else {
-		result = degrees;
-	}
-
-	return result;
 }
 
 /*
@@ -1573,49 +1173,6 @@ void initPanTilt (Servo *pan, Servo *tilt) {
 }
 
 /*
-	Initialize the RoboClaw 2x5 motor controller
-*/
-void initRoboClaw (uint8_t address, uint16_t bps, Motor *leftM1, Motor *rightM2) {
-	console.print(F("Initializing the RoboClaw 2x5 Motor Controller at address "));
-	console.print(address, HEX);
-	console.print(F(", for "));
-	console.print(bps);
-	console.println(F(" Bps communication."));
-
-	roboClaw.begin(bps);
-
-	//	Set the RoboClaw motor constants
-	roboClaw.SetM1VelocityPID(address, ROBOCLAW_KD, ROBOCLAW_KP, ROBOCLAW_KI, ROBOCLAW_QPPS);
-	roboClaw.SetM2VelocityPID(address, ROBOCLAW_KD, ROBOCLAW_KP, ROBOCLAW_KI, ROBOCLAW_QPPS);
-
-	//	For Packet Serial modes
-	leftM1->name = ROBOCLAW_MOTOR_LEFT_NAME;
-	leftM1->location = Left;
-	leftM1->encoder = 0;
-	leftM1->encoderStatus = 0;
-	leftM1->encoderValid = false;
-	leftM1->speed = 0;
-	leftM1->speedStatus = 0;
-	leftM1->speedValid = false;
-	leftM1->forward = true;
-	leftM1->distance = 0;
-	leftM1->distanceValid = false;		    
-
-	//	For Packet Serial modes
-	rightM2->name = ROBOCLAW_MOTOR_RIGHT_NAME;
-	rightM2->location = Right;
-	rightM2->encoder = 0;
-	rightM2->encoderStatus = 0;
-	rightM2->encoderValid = false;
-	rightM2->speed = 0;
-	rightM2->speedStatus = 0;
-	rightM2->speedValid = false;
-	rightM2->forward = true;
-	rightM2->distance = 0;
-	rightM2->distanceValid = false;		    
-}
-
-/*
 	Initialize sensors
 */
 void initSensors (void) {
@@ -1688,17 +1245,39 @@ void initSensors (void) {
 /*
 	Initialize servos to defaults
 */
-void initServos (Servo *lift, Servo *wrist, Servo *grab, Servo *pan, Servo *tilt) {
-	lift->pin = SERVO_GRIP_LIFT_PIN;
-	lift->name = SERVO_GRIP_LIFT_NAME;
-	lift->offset = SERVO_GRIP_LIFT_OFFSET;
-	lift->homePos = SERVO_GRIP_LIFT_HOME;
-	lift->msPulse = 0;
-	lift->angle = 0;
-	lift->minPulse = SERVO_GRIP_LIFT_MIN;
-	lift->maxPulse = SERVO_GRIP_LIFT_MAX;
-	lift->maxDegrees = SERVO_MAX_DEGREES;
-	lift->error = 0;
+void initServos (Servo *pan, Servo *shoulder, Servo *elbow, Servo *wrist, Servo *grab) {
+	pan->pin = SERVO_ARM_PAN_PIN;
+	pan->name = SERVO_ARM_PAN_NAME;
+	pan->offset = SERVO_ARM_PAN_OFFSET;
+	pan->homePos = SERVO_ARM_PAN_HOME;
+	pan->msPulse = 0;
+	pan->angle = 0;
+	pan->minPulse = SERVO_ARM_PAN_LEFT_MIN;
+	pan->maxPulse = SERVO_ARM_PAN_RIGHT_MAX;
+	pan->maxDegrees = SERVO_MAX_DEGREES;
+	pan->error = 0;
+
+	shoulder->pin = SERVO_ARM_SHOULDER_PIN;
+	shoulder->name = SERVO_ARM_SHOULDER_NAME;
+	shoulder->offset = SERVO_ARM_SHOULDER_OFFSET;
+	shoulder->homePos = SERVO_ARM_SHOULDER_HOME;
+	shoulder->msPulse = 0;
+	shoulder->angle = 0;
+	shoulder->minPulse = SERVO_ARM_SHOULDER_DOWN_MIN;
+	shoulder->maxPulse = SERVO_ARM_SHOULDER_UP_MAX;
+	shoulder->maxDegrees = SERVO_MAX_DEGREES;
+	shoulder->error = 0;
+
+	elbow->pin = SERVO_ARM_ELBOW_PIN;
+	elbow->name = SERVO_ARM_ELBOW_NAME;
+	elbow->offset = SERVO_ARM_ELBOW_OFFSET;
+	elbow->homePos = SERVO_ARM_ELBOW_HOME;
+	elbow->msPulse = 0;
+	elbow->angle = 0;
+	elbow->minPulse = SERVO_ARM_ELBOW_MIN;
+	elbow->maxPulse = SERVO_ARM_ELBOW_MAX;
+	elbow->maxDegrees = SERVO_MAX_DEGREES;
+	elbow->error = 0;
 
 	wrist->pin = SERVO_GRIP_WRIST_PIN;
 	wrist->name = SERVO_GRIP_WRIST_NAME;
@@ -1721,28 +1300,6 @@ void initServos (Servo *lift, Servo *wrist, Servo *grab, Servo *pan, Servo *tilt
 	grab->maxPulse = SERVO_GRIP_GRAB_MAX;
 	grab->maxDegrees = SERVO_MAX_DEGREES;
 	grab->error = 0;
-
-	pan->pin = SERVO_PAN_PIN;
-	pan->name = SERVO_PAN_NAME;
-	pan->offset = SERVO_PAN_OFFSET;
-	pan->homePos = SERVO_PAN_HOME;
-	pan->msPulse = 0;
-	pan->angle = 0;
-	pan->minPulse = SERVO_PAN_LEFT_MIN;
-	pan->maxPulse = SERVO_PAN_RIGHT_MAX;
-	pan->maxDegrees = SERVO_MAX_DEGREES;
-	pan->error = 0;
-
-	tilt->pin = SERVO_TILT_PIN;
-	tilt->name = SERVO_TILT_NAME;
-	tilt->offset = SERVO_TILT_OFFSET;
-	tilt->homePos = SERVO_TILT_HOME;
-	tilt->msPulse = 0;
-	tilt->angle = 0;
-	tilt->minPulse = SERVO_TILT_DOWN_MIN;
-	tilt->maxPulse = SERVO_TILT_UP_MAX;
-	tilt->maxDegrees = SERVO_MAX_DEGREES;
-	tilt->error = 0;
 }
 
 /*
