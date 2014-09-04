@@ -17,9 +17,10 @@ and give servo movement commands. I alsoSurveillance have a Pololu Mini Maestro 
 into play if controlling the servos and handling the sensor(s) is too much of a load on the Bluno. Either
 board is capable of using the servo controller, since it has three different control modes.
 
-	Locomotion will be provided by a Dagu 4 Channel 5-12V, 2A Brushed DC Motor Controller (http://www.robotshop.com/en/dagu-4-channel-brushed-dc-motor-controller.html),
-driving four Pololu 50:1 Micro Metal HP Gearmotors (with Extended Motor Shaft, http://www.pololu.com/product/2213),
-with Pololu Optical Encoders for Micro Metal Gearmotors, 5V (http://www.pololu.com/product/2590) and Mecanum
-wheels (http://www.robotshop.com/en/mecanum-wheel-4-pack-w-metal-hubs.html). The Entity Tracker will be able to
-move in any direction, without changing its orientation.
+	Locomotion will be provided by a Dagu 4 Channel 5-12V, 2A Brushed DC Motor Controller
+(http://www.robotshop.com/en/dagu-4-channel-brushed-dc-motor-controller.html), driving four Pololu 50:1 Micro
+Metal HP Gearmotors (with Extended Motor Shaft, http://www.pololu.com/product/2213), with Pololu Optical Encoders
+for Micro Metal Gearmotors, 5V (http://www.pololu.com/product/2590), and Mecanum wheels
+(http://www.robotshop.com/en/mecanum-wheel-4-pack-w-metal-hubs.html) by FingerTech. The Entity Tracker will
+be able to move in any direction, without changing its orientation.
 
